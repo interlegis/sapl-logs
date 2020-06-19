@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SAPL Logs</title>
+    <style>
+        .outline {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        .fixed{
+            width: 300px;
+        }
+        table td, table td * {
+            vertical-align: top;
+            tbody tr:nth-child(even) {
+                background: orange;
+            }
+        }
+        td {
+            white-space: normal !important; // To consider whitespace.
+        }
+    </style>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+</head>
+<body>
+    <h1>SAPL Logs</h1>
+    <div class="container-fluid">
+    <form method="GET" action="/search">
+
+            <div class="form-group">
+                <input type="text" name="q" id="q" value="{{q}}" maxlength="50" size="50" placeholder="Search here"/> &nbsp;
+                <input type="submit" id="search" name="search" value="Pesquisar" class="btn btn-primary"/>
+                <strong>Rows</strong>
+                <select name="rows" id="rows">
+                    {% for r in [10, 20, 50, 100] %}
+                    <option value="{{r}}" {% if rows == r %}selected{% endif %}>{{r}}</option>
+                    {% endfor %}
+                </select>
+                <strong>Sort by:</strong>
+                <select name="sort-by" id="sort-by">
+                    <option value="1">relevance</option>
+                    <option value="2">datetime desc</option>
+                    <option value="3">datetime asc</option>
+                </select>
+                <br/>
+            </div>
+            <div class="form-group form-check">
+                <input type="checkbox" class="form-check-input" id="asjson">
+                <label class="form-check-label" for="asjson">As json</label>
+            </div>
+    </form>
+    </div>
+    <div class="container-fluid fixed">
+        <div class="row">
+        {% if result %}
+            <div class="col-sm-4">
+                <td width="25%">
+                        <h2>Facets:</h2>
+                        {% if 'facet_counts' in result %}
+                            {% for key, values in result['facet_counts']['facet_fields'].items() %}
+                                <strong>{{ key }}:</strong></br/>
+                                {% set pair = values[::2]|zip(values[1::2]) %}
+                                {% for k,v in pair %}
+                                    <a href="{{request.path}}?q={{q}}&fq={{key}}:{{k}}{{filters}}">{{ k }}</a>({{ v }})<br/>
+                                {% endfor %}
+                                <br/>
+                            {% endfor %}
+                        {% endif %}
+                </td>
+            </div>
+            <div class="col-sm-8">
+            <h2>Results</h2>
+            <h4>{{ result['response']['numFound'] }} records retrieved in {{result['responseHeader']['QTime']}}ms</h4>
+             <div>
+                {% for doc in result['response']['docs'] %}
+                 <div>
+                        <table class="table table-striped outline">
+                            <tr alig="right">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="button" id="copy-button"
+                                            data-toggle="tooltip" data-placement="button"
+                                            title="Copy to Clipboard">Copy</button>
+                                </span>
+                            </tr>
+                            {% for key, value in doc.items() %}
+                            <tr>
+                                <td>{{key|capitalize}}:</td>
+                                {% if key == 'stacktrace' %}
+                                        <br/>
+                                        <td style="word-wrap: break-word">{{ value }}<br/></td>
+                                {% else %}
+                                    <td style="word-wrap: break-word">{{ value }}<br/></td>
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                        </table>
+                 </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    </div>
+<nav aria-label="Page navigation example">
+  <ul class="pagination">
+    <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+    <li class="page-item"><a class="page-link" href="#">1</a></li>
+    <li class="page-item"><a class="page-link" href="#">2</a></li>
+    <li class="page-item"><a class="page-link" href="#">3</a></li>
+    <li class="page-item"><a class="page-link" href="#">Next</a></li>
+  </ul>
+</nav>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+    <script language="JavaScript">
+        $(document).ready(function() {
+            $('#copy-button').bind('click', function() {
+                var table = $(this).closest('table');
+                console.log(table);
+            });
+        });
+    </script>
+</body>
+</html>

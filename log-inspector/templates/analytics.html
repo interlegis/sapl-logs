@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Analytics</title>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+    <!-- <script src="{{ url_for('static', filename='js/oboe-browser.js')}}"></script> -->
+    <script src="{{ url_for('static', filename='node_modules/oboe/dist/oboe-browser.js')}}"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            console.log("Ready!");
+            var count = 0;
+
+            $("#textarea").change(function() {
+              $('#textarea').scrollTop($('textarea')[0].scrollHeight);
+            });
+
+            $("#start").click(function() {
+                    var start = new Date().getTime();
+                    oboe('/stream')
+                       .node('result-set.docs.*', function(doc) {
+                          // This callback will be called everytime
+                          // a new object is found in the docs array
+                          console.log('doc ' + count, doc);
+                          
+                          $("#textarea").append(doc.id+'\n');
+                          count++;
+                       })
+                       .done(function(things){
+                            console.log('done');
+                            console.log(count + ' records');
+                            var end = new Date().getTime();
+                            var time = end - start;
+                            console.log('Execution time: ' + time + 'ms');
+                       });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div>
+        <input type="button" id="start" name="start" value="Stream!">
+        <textarea id="textarea"
+                  name="textarea"
+                  type="textarea"
+                  rows="20" cols="100"></textarea>
+    </div>
+</body>
+</html>
