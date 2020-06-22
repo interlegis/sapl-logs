@@ -6,7 +6,7 @@ __Make sure you have the env variable $SOLR_HOME setup__
 
 1. Start solr in cloud mode:
 
-`$SOLR_HOME/bin/solr start -c`
+`sudo docker run -p 8983:8983 -p 9983:9983 -it solr:7.7.3 bash -c "bin/solr start -f -c"`
 
 2. Upload configset sapl-logs:
 
