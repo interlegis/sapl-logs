@@ -22,4 +22,4 @@ __Make sure you have the env variable $SOLR_HOME setup__
 
 ### Starting Flask app
 
-1. `./bin/run-flask`
+1. `./bin/run-flask.sh`
