@@ -10,11 +10,11 @@ __Make sure you have the env variable $SOLR_HOME setup__
 
 2. Upload configset sapl-logs:
 
-`./bin/upload-config.sh`
+`bin/upload-config.sh`
 
 3. Create collection:
 
-`./bin/create-collection.sh`
+`bin/create-collection.sh`
 
 #### Indexing files
 
@@ -22,4 +22,4 @@ __Make sure you have the env variable $SOLR_HOME setup__
 
 ### Starting Flask app
 
-1. `./bin/run-flask`
+1. `bin/run-flask.sh`
