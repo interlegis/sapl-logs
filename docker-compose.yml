@@ -1,0 +1,38 @@
+version: '3.7'
+
+services:
+  sapl-logs-solr:
+    container_name: sapl-logs-solr
+    image: solr:7.4-alpine
+    volumes:
+      - solr_data:/opt/solr/server/solr
+      - solr_configsets:/opt/solr/server/solr/configsets
+    ports:
+      - "8983:8983"
+      - "9983:9983"
+    networks:
+      - sapl-logs-net
+    command: bin/solr start -f -c
+
+  sapl-logs:
+    container_name: sapl-logs
+    build:
+      context: .
+    volumes:
+      - .:/usr/src/app
+    ports:
+    - "5000:5000"
+    depends_on:
+      - sapl-logs-solr
+    networks:
+      - sapl-logs-net
+    command: bin/run-flask.sh
+
+volumes:
+  solr_data:
+  solr_configsets:
+
+networks:
+  sapl-logs-net:
+    name: sapl-logs-net
+    driver: bridge
