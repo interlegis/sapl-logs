@@ -8,7 +8,11 @@ RUN apk update;\
 
 WORKDIR /usr/src/app
 
-COPY requirements.txt ./
+ADD . /usr/src/app
 RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 5000
+
+VOLUME ["/usr/src/app"]
+
+CMD ["/usr/src/app/bin/run-flask.sh"]
