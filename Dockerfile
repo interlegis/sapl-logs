@@ -15,4 +15,4 @@ EXPOSE 5000
 
 VOLUME ["/usr/src/app"]
 
-CMD ["/usr/src/app/bin/run-flask.sh"]
+CMD ["python", "/usr/src/app/log-inspector/log-inspector.py"]

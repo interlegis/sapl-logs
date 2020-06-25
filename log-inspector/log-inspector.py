@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request, render_template
 from flask_socketio import SocketIO, emit
 import requests
+import os
 
 
 app = Flask(__name__)
@@ -10,7 +11,9 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 app.jinja_env.filters['zip'] = zip
 
-SOLR_URL = 'http://localhost:8983/solr/sapl-logs/select'
+app.debug = True
+
+SOLR_URL = os.getenv('SOLR_URL', 'http://localhost:8983/solr/sapl-logs/select')
 
 FQ_PARAMS = "facet=true" \
             "&facet.mincount=1" \
@@ -67,3 +70,6 @@ def stream():
     # for c in r.iter_lines():
     #     ...: print(c)
     # return jsonify({'message': 'hello, world!'})
+
+if __name__=='__main__':
+    app.run(host='0.0.0.0')

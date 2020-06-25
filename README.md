@@ -15,3 +15,6 @@
 4. Indexing files
 
     `$ ./python-indexer/python-indexer.sh logs/<log-file>`
+
+
+sudo docker run -p 5000:5000 -e SOLR_URL=<url> -it flask
