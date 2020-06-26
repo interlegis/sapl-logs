@@ -24,11 +24,9 @@ services:
       - .:/var/interlegis/sapl-logs
     ports:
       - "5000:5000"
-    depends_on:
-      - sapl-logs-solr
     networks:
       - sapl-logs-net
-
+    command: bash -c "while ! curl -s sapl-logs-solr:8983; do sleep 1; done; python log-inspector/log-inspector.py"
 volumes:
   solr_data:
   solr_configsets:
