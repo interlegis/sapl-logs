@@ -16,20 +16,18 @@ services:
 
   sapl-logs:
     container_name: sapl-logs
-    #image: flask
     build:
       context: .
     environment:
       SOLR_URL: http://sapl-logs-solr:8983/solr/sapl-logs/select
     volumes:
-      - .:/usr/src/app
+      - .:/var/interlegis/sapl-logs
     ports:
-    - "5000:5000"
+      - "5000:5000"
     depends_on:
       - sapl-logs-solr
     networks:
       - sapl-logs-net
-    command: bin/run-flask.sh
 
 volumes:
   solr_data:
