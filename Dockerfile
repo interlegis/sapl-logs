@@ -2,17 +2,16 @@ FROM python:3.8-alpine
 
 RUN apk update;\
     apk upgrade;\
-    apk add bash;\
-    apk add curl;\
-    apk add zip
+    apk add bash curl nano zip
 
-WORKDIR /usr/src/app
+WORKDIR /var/interlegis/sapl-logs
 
-ADD . /usr/src/app
+COPY requirements.txt ./
+COPY log-inspector/ log-inspector/
+COPY python-indexer/ python-indexer/
+
 RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 5000
 
-VOLUME ["/usr/src/app"]
-
-CMD ["python", "/usr/src/app/log-inspector/log-inspector.py"]
+CMD python log-inspector/log-inspector.py
