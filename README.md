@@ -2,7 +2,7 @@
 
 1. Start solr in cloud mode:
 
-    `$ sudo docker-compose up"`
+    `$ sudo docker-compose up --build`
 
 2. Upload configset sapl-logs:
 
@@ -17,4 +17,5 @@
     `$ ./python-indexer/python-indexer.sh logs/<log-file>`
 
 
-sudo docker run -p 5000:5000 -e SOLR_URL=<url> -it flask
+5. Acessar UI
+    `http://localhost:5000/search`
