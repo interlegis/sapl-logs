@@ -1,0 +1,37 @@
+version: '3.7'
+
+services:
+  sapl-logs-solr:
+    container_name: sapl-logs-solr
+    image: solr:7.4-alpine
+    volumes:
+      - solr_data:/opt/solr/server/solr
+      - solr_configsets:/opt/solr/server/solr/configsets
+    ports:
+      - "8983:8983"
+      - "9983:9983"
+    networks:
+      - sapl-logs-net
+    command: bin/solr start -f -c
+
+  sapl-logs:
+    container_name: sapl-logs
+    build:
+      context: .
+    environment:
+      SOLR_URL: http://sapl-logs-solr:8983/solr/sapl-logs/select
+    volumes:
+      - .:/var/interlegis/sapl-logs
+    ports:
+      - "5000:5000"
+    networks:
+      - sapl-logs-net
+    command: bash -c "while ! curl -s sapl-logs-solr:8983; do sleep 1; done; python log-inspector/log-inspector.py"
+volumes:
+  solr_data:
+  solr_configsets:
+
+networks:
+  sapl-logs-net:
+    name: sapl-logs-net
+    driver: bridge
