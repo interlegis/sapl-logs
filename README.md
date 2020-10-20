@@ -14,7 +14,7 @@
 
 4. Indexing files
 
-    `$ ./python-indexer/python-indexer.sh logs/<log-file>`
+    `$ ./python-indexer/python-indexer.py logs/<log-file>`
 
 
 5. Acessar UI
