@@ -14,8 +14,7 @@
 
 4. Indexing files
 
-    `$ ./python-indexer/python-indexer.py logs/<log-file>`
-
+    `$ python3 ./python-indexer/python-indexer.py logs/<log-file>`
 
 5. Acessar UI
     `http://localhost:5000/search`
