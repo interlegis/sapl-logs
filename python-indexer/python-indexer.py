@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 import os
-import sys
-import re
-import json
-import requests
-import time
 import logging
+import sys
+import requests
+import json
+import time
+import re
 
 # TODO: inserir timestamp no logging do python-indexer.py
 
@@ -14,49 +15,51 @@ USE_SOLR = os.getenv('USE_SOLR', True)  # TODO: trocar por False em produção
 SOLR_BASE_URL = os.getenv('SOLR_URL', 'http://localhost:8983') + '/solr'
 
 SOLR_UPDATE_URL = f'{SOLR_BASE_URL}/sapl-logs/update?commitWithin=1000'
-SOLR_COLLECTION_STATUS = f'{SOLR_BASE_URL}/sapl-logs/admin/ping?distrib=true&wt=json'
+
+SOLR_COLLECTION_STATUS = (
+    f'{SOLR_BASE_URL}/sapl-logs/admin/ping?distrib=true&wt=json'
+)
+
 BATCH_SIZE = 10  # https://lucidworks.com/post/really-batch-updates-solr-2/
 
 previous = None
+
 buffer = []
 payload = []
+
 num_docs = 0
 total_docs = 0
 
 # logging setup
 logfilename = 'python-indexer.log'
-logging.basicConfig(filename=logfilename,
-                    filemode='w+',
-                    level=logging.INFO)
+
+logging.basicConfig(
+    filename=logfilename,
+    filemode='w+',
+    level=logging.INFO
+)
+
 logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 logger = logging.getLogger('python-indexer')
 logger.setLevel(logging.DEBUG)
+
 print(f"The logging of this program is done at {logfilename}")
 
 
-def follow(fd):
-    """generator function that yields new lines in a file
-    """
-    #
-    # DESCOMENTAR LINHAS ABAIXO EM PRODUCAO!!!!
-    #
-    # # seek the end of the file
-    # fd.seek(0, os.SEEK_END)
+def push_to_solr():
+    logger.debug(f"Sending {len(payload)} documents to Solr")
 
-    # start infinite loop
-    while True:
-        # read last line of file
-        line = fd.readline()
-        # sleep if file hasn't been updated
-        if not line:
-            time.sleep(0.1)
-            continue
-
-        yield line
+    r = requests.post(
+        SOLR_UPDATE_URL,
+        data=json.dumps(payload),
+        headers={'Content-Type': 'application/json; charset=utf-8'}
+    )
+    logger.debug(r.content)
 
 
 def parse_fields(groups):
     from datetime import datetime as dt
+
     iso8601 = "{} {}".format(groups[1], groups[2].replace(",", "."))
     d = dt.fromisoformat(iso8601)
     datetime = d.strftime('%Y-%m-%dT%H:%M:%SZ')
@@ -65,8 +68,7 @@ def parse_fields(groups):
 
     fields = {
         'level': groups[0],
-        'datetime': datetime,
-        'line': line,
+        'datetime': datetime
     }
 
     parts = groups[3].split()
@@ -87,19 +89,21 @@ def parse_fields(groups):
 
 def parse_logs(line):
     global previous
-    global buffer
-    global payload
-    global num_docs
 
     # discard empty lines
     if not line.strip():
         return
 
-    pattern = "^(ERROR|INFO|DEBUG\WARN)\s+(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2},\d+)\s+(.*)"
+    pattern = (
+        "^(ERROR|INFO|DEBUG|WARNING)" +
+        r'\s+(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2},\d+)\s+(.*)'
+    )
     match = re.match(pattern, line)
+
     if match:
         groups = match.groups()
         fields = parse_fields(groups)
+        fields['line'] = line
 
         # if match but buffer is full then there was a stack trace before
         if buffer and previous:
@@ -121,13 +125,24 @@ def parse_logs(line):
     logger.debug(len(payload))
 
 
-def push_to_solr():
-    logger.debug(f"Sending {len(payload)} documents to Solr")
-    r = requests.post(SOLR_UPDATE_URL,
-                      data=json.dumps(payload),
-                      headers={'Content-Type': 'application/json; charset=utf-8'}
-                      )
-    logger.debug(r.content)
+def follow(fd):
+    """ generator function that yields new lines in a file """
+    #
+    # DESCOMENTAR LINHAS ABAIXO EM PRODUCAO
+    #
+    # # seek the end of the file
+    # fd.seek(0, os.SEEK_END)
+
+    # start infinite loop
+    while True:
+        # read last line of file
+        line = fd.readline()
+        # sleep if file hasn't been updated
+        if not line:
+            time.sleep(0.1)
+            continue
+
+        yield line
 
 
 def check_solr():
@@ -137,11 +152,13 @@ def check_solr():
             print(f"Solr server at {SOLR_BASE_URL} is up and running...")
 
         print("Checking collection health...")
+
         r = requests.get(SOLR_COLLECTION_STATUS)
         data = r.json()
         if data['status'] == 'OK':
             print("Collection sapl-logs is healthy")
-    except Exception as e:
+
+    except Exception:
         logger.error(f"Error connecting to Solr at {SOLR_COLLECTION_STATUS}")
         sys.exit(1)
 
@@ -155,18 +172,21 @@ if __name__ == '__main__':
     check_solr()
 
     filename = sys.argv[1]
-
     print(f"Opening log file {filename}...")
     logfile = open(filename, 'r')
     loglines = follow(logfile)
 
     # iterate over the generator
     for line in loglines:
-        logger.debug(f"Current palyoad size: {len(payload)}")
+        logger.debug(f"Current payload size: {len(payload)}")
+        print(line)
         parse_logs(line)
+
+        print("n", total_docs)
         num_docs = (num_docs + 1) % BATCH_SIZE
         if num_docs == 0 and payload:
             push_to_solr()
             total_docs += len(payload)
             payload.clear()
+
     push_to_solr()
