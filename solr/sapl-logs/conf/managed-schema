@@ -116,6 +116,10 @@
     <field name="_root_" type="string" indexed="true" stored="false" docValues="false" />
     <field name="_text_" type="text_general" indexed="true" stored="false" multiValued="true"/>
 
+    <!-- Solr TTL fields -->
+    <field name="_ttl_" type="string" indexed="true" multiValued="false" stored="true" />
+    <field name="expire_at" type="pdate" multiValued="false" indexed="true" stored="true" />
+
     <!-- SAPL log fields -->
     <field name="level" type="string" indexed="true" stored="true" docValues="true"/>
 
@@ -133,7 +137,7 @@
     <field name="datetime" type="pdate" indexed="true" stored="true" default="NOW"/>
     <field name="message" type="text_pt" indexed="true" stored="true" />
     <field name="stacktrace" type="text_pt" indexed="true" stored="true" required="false" large="true" sortMissingLast="true" />
-    <field name="timestamp" type="pdate" indexed="true" stored="true" default="NOW"/>
+    <field name="indexed_at" type="pdate" indexed="true" stored="true" default="NOW"/>
     <field name="log_type" type="string" indexed="true" stored="true" default="SAPL_LOG"/>
     <field name="fingerprint" type="string" stored="true" indexed="true" multiValued="false" />
 

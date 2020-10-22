@@ -310,7 +310,7 @@
       -->
     <autoCommit>
          <maxTime>300000</maxTime>
-         <maxDocs>4000</maxDocs>
+         <maxDocs>5000</maxDocs>
       <openSearcher>false</openSearcher>
     </autoCommit>
 
@@ -698,7 +698,7 @@
       <str name="q.alt">*:*</str>      
       <bool name="lowercaseOperators">true</bool>
       <str name="qf">
-           line^5 message^2.0 stacktrace^10
+           line^5 message^2.0 stacktrace^5
       </str>      
       <str name="wt">json</str>
       <bool name="indent">true</bool>
@@ -1237,6 +1237,7 @@
 
   <!-- The update.autoCreateFields property can be turned to false to disable schemaless mode -->
   <updateRequestProcessorChain name="solr_log" default="true" processor="uuid">
+    <!-- Deduplication of Solr docs -->
     <processor class="solr.processor.SignatureUpdateProcessorFactory">
         <bool name="enabled">true</bool>
         <str name="signatureField">fingerprint</str>
@@ -1244,6 +1245,20 @@
         <str name="fields">level,line</str>
         <str name="signatureClass">solr.processor.Lookup3Signature</str>
     </processor>
+
+    <!-- AutoPurging Solr documents -->
+    <processor class="solr.DefaultValueUpdateProcessorFactory">
+        <str name="fieldName">_ttl_</str>
+        <!-- Quando expirar documentos: +60SECONDS, +30DAYS, +2WEEKS, +4HOURS -->
+        <str name="value">+30DAYS</str>
+    </processor>
+    <processor class="solr.processor.DocExpirationUpdateProcessorFactory">
+        <!-- Quanto tempo rodar periodicamente o auto purge. 86400s = 1 dia -->
+        <int name="autoDeletePeriodSeconds">86400</int>
+        <str name="ttlFieldName">_ttl_</str>
+        <str name="expirationFieldName">expire_at</str>
+    </processor>
+
     <processor class="solr.LogUpdateProcessorFactory"/>
     <processor class="solr.DistributedUpdateProcessorFactory"/>
     <processor class="solr.RunUpdateProcessorFactory"/>
