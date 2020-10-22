@@ -127,11 +127,9 @@ def parse_logs(line):
 
 def follow(fd):
     """ generator function that yields new lines in a file """
-    #
-    # DESCOMENTAR LINHAS ABAIXO EM PRODUCAO
-    #
-    # # seek the end of the file
-    # fd.seek(0, os.SEEK_END)
+    
+    # seek the end of the file
+    fd.seek(0, os.SEEK_END)
 
     # start infinite loop
     while True:
