@@ -156,7 +156,7 @@ def check_solr():
         if data['status'] == 'OK':
             print("Collection sapl-logs is healthy")
 
-    except Exception:
+    except Exception as e:
         logger.error(f"Error connecting to Solr at {SOLR_COLLECTION_STATUS}")
         sys.exit(1)
 

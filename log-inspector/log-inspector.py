@@ -27,7 +27,7 @@ FQ_PARAMS = "facet=true" \
 
 
 
-@app.route('/search', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def search():
     q = request.args.get('q', '')
     rows = request.args.get('rows', '10')
@@ -44,7 +44,12 @@ def search():
     facets = FQ_PARAMS
     SOLR = f"{SOLR_URL}?q={q}&wt=json&{facets}&{filters}&rows={rows}"
     resp = requests.get(SOLR)
-    result = resp.json()
+    try:
+        result = resp.json()
+    except Exception as e:
+        print(resp.content)
+        return e
+
     if as_json:
         return jsonify(result)
     else:

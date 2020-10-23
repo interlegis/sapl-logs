@@ -697,12 +697,10 @@
       <str name="q.op">AND</str>
       <str name="q.alt">*:*</str>      
       <bool name="lowercaseOperators">true</bool>
-      <str name="qf">
-           line^5 message^2.0 stacktrace^5
-      </str>      
+      <str name="qf">line^5 message^2.0 stacktrace^5</str>
       <str name="wt">json</str>
       <bool name="indent">true</bool>
-      <str name="df">line</str>
+      <str name="df">_text_</str>
       <str name="fl">*,score</str>
       <int name="rows">10</int>
 
