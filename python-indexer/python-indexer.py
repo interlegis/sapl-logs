@@ -127,7 +127,7 @@ def parse_logs(line):
 
 def follow(fd):
     """ generator function that yields new lines in a file """
-    
+
     # seek the end of the file
     fd.seek(0, os.SEEK_END)
 
@@ -157,7 +157,10 @@ def check_solr():
             print("Collection sapl-logs is healthy")
 
     except Exception as e:
-        logger.error(f"Error connecting to Solr at {SOLR_COLLECTION_STATUS}")
+        logger.error(
+            "Exception: " + str(e) +
+            f"\nError connecting to Solr at {SOLR_COLLECTION_STATUS}"
+        )
         sys.exit(1)
 
 
@@ -177,10 +180,8 @@ if __name__ == '__main__':
     # iterate over the generator
     for line in loglines:
         logger.debug(f"Current payload size: {len(payload)}")
-        print(line)
         parse_logs(line)
 
-        print("n", total_docs)
         num_docs = (num_docs + 1) % BATCH_SIZE
         if num_docs == 0 and payload:
             push_to_solr()
